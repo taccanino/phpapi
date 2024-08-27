@@ -4,7 +4,7 @@ namespace utils;
 
 class Router
 {
-    public function __construct(private Container $container, private array $routes = []) {}
+    public function __construct(private array $routes = []) {}
 
     public function add(string $method, string $path, callable $callback, array $parameters = [], array $middlewares = []): void
     {
@@ -29,7 +29,7 @@ class Router
             $params = $route->match($method, $url);
             if ($params === false)
                 continue;
-            return $route($this->container, $params);
+            return $route($params);
         }
 
         http_response_code(404);

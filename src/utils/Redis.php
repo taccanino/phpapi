@@ -1,0 +1,45 @@
+<?php
+
+namespace utils;
+
+class Redis implements ICache
+{
+    private \RedisClient\RedisClient $redisClient;
+    private string $redisServer;
+    private string $redisVersion;
+
+    public function __construct(private EnvLoader $envLoader)
+    {
+        $this->connect();
+    }
+
+    //this method can be rewritten for different cache providers
+    private function connect(): void
+    {
+        require_once __DIR__ . '/redis/autoloader.php';
+
+        $this->redisServer = $envLoader->get('REDIS_SERVER');
+        if ($this->redisServer === null)
+            throw new \Exception('The REDIS_SERVER environment variable is not set');
+
+        $this->redisVersion = $envLoader->get('REDIS_VERSION');
+        if ($this->redisVersion === null)
+            throw new \Exception('The REDIS_VERSION environment variable is not set');
+
+        $this->redisClient = \RedisClient\ClientFactory::create([
+            'server' => $envLoader->get('REDIS_SERVER'),
+            'timeout' => 2,
+            'version' => $envLoader->get('REDIS_VERSION'),
+        ]);
+    }
+
+    public function get(string $key): ?string
+    {
+        return $this->redisClient->get($key);
+    }
+
+    public function set(string $key, string $value, ?int $seconds = null, ?int $milliseconds = null, ?bool $exist = null): ?bool
+    {
+        return $this->redisClient->set($key, $value, $seconds, $milliseconds, $exist ? 'XX' : ($exist == false ? 'NX' : null));
+    }
+}

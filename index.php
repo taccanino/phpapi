@@ -10,32 +10,43 @@ function absolutePath(string $path): string
 
 require_once absolutePath('autoload.php');
 
-$CONTAINER = new utils\Container();
-$CONTAINER->init([
-    utils\EnvLoader::class => fn() => new utils\EnvLoader(absolutePath('.env')),
-    utils\Logger::class => fn() => new utils\Logger($CONTAINER->get(utils\EnvLoader::class)),
-    utils\ErrorHandler::class => fn() => new utils\ErrorHandler($CONTAINER->get(utils\EnvLoader::class), $CONTAINER->get(utils\Logger::class)),
-    utils\Router::class => fn() => new utils\Router($CONTAINER),
-]);
+use utils\Container;
+use utils\EnvLoader;
+use utils\Logger;
+use utils\ErrorHandler;
+use utils\ICache;
+use utils\Redis;
+use utils\Database;
+use utils\Router;
+use utils\Route;
 
-$CONTAINER->loadAll();
-$router = $CONTAINER->get(utils\Router::class);
-$router->addAll([
-    new utils\Route("GET", "/", function (utils\Container $container, array $params) {
-        echo json_encode(['container' => $container, 'params' => $params]);
-    }),
-    new utils\Route(
-        "GET",
-        "/{id}",
-        function (utils\Container $container, array $params) {
-            throw new Exception("An error occurred");
-            echo json_encode(['params' => $params]);
-        },
-        ['id' => ['regex' => '\d+', 'type' => 'int']],
-        [function (utils\Container $container, array $params) {
-            return [...$params, "middlewarePassed" => true];
-        }]
+$CONTAINER = new Container();
+$CONTAINER->init([
+    EnvLoader::class => fn() => new EnvLoader(absolutePath('.env')),
+    Logger::class => fn() => new Logger($CONTAINER->get(EnvLoader::class)),
+    ErrorHandler::class => fn() => new ErrorHandler($CONTAINER->get(EnvLoader::class), $CONTAINER->get(Logger::class)),
+    ICache::class => fn() => new Redis($CONTAINER->get(EnvLoader::class)),
+    Database::class => fn() => new Database($CONTAINER->get(EnvLoader::class), $CONTAINER->get(ICache::class)),
+    Router::class => fn() => new Router(
+        [
+            new Route("GET", "/", function (array $params) {
+                global $CONTAINER;
+                echo json_encode(['container' => $CONTAINER, 'params' => $params]);
+            }),
+            new Route(
+                "GET",
+                "/{id}",
+                function (array $params) {
+                    echo json_encode(['params' => $params]);
+                },
+                ['id' => ['regex' => '\d+', 'type' => 'int']],
+                [function (array $params) {
+                    return [...$params, "middlewarePassed" => true];
+                }]
+            ),
+        ]
     ),
 ]);
 
-$router->resolve(); // matches the current request to the proper route, executes the callback and returns the result if any
+$CONTAINER->loadAll();
+$CONTAINER->get(Router::class)->resolve(); // matches the current request to the proper route, executes the callback and returns the result if any
