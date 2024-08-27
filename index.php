@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 function absolutePath(string $path): string
 {
@@ -16,7 +16,8 @@ use utils\Logger;
 use utils\ErrorHandler;
 use utils\ICache;
 use utils\Redis;
-use utils\Database;
+use utils\IDatabase;
+use utils\Mysql;
 use utils\Router;
 use utils\Route;
 
@@ -25,8 +26,16 @@ $CONTAINER->init([
     EnvLoader::class => fn() => new EnvLoader(absolutePath('.env')),
     Logger::class => fn() => new Logger($CONTAINER->get(EnvLoader::class)),
     ErrorHandler::class => fn() => new ErrorHandler($CONTAINER->get(EnvLoader::class), $CONTAINER->get(Logger::class)),
-    ICache::class => fn() => new Redis($CONTAINER->get(EnvLoader::class)),
-    Database::class => fn() => new Database($CONTAINER->get(EnvLoader::class), $CONTAINER->get(ICache::class)),
+    ICache::class => function () {
+        global $CONTAINER;
+        try {
+            return new Redis($CONTAINER->get(EnvLoader::class));
+        } catch (Exception $e) {
+            $CONTAINER->get(Logger::class)->log($e->getMessage()); //non blocking fault. No cache will be used.
+            return null;
+        }
+    },
+    IDatabase::class => fn() => new Mysql($CONTAINER->get(EnvLoader::class), $CONTAINER->get(ICache::class)),
     Router::class => fn() => new Router(
         [
             new Route("GET", "/", function (array $params) {

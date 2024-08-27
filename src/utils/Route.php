@@ -68,12 +68,12 @@ class Route
         return $matches;
     }
 
-    public function __invoke(Container $container, array $parameters): mixed
+    public function __invoke(array $parameters): mixed
     {
         $modifiedParameters = $parameters;
         foreach ($this->middlewares as $middleware)
-            $modifiedParameters = $middleware($container, $modifiedParameters);
+            $modifiedParameters = $middleware($modifiedParameters);
         $callback = $this->callback;
-        return $callback($container, $modifiedParameters);
+        return $callback($modifiedParameters);
     }
 }
