@@ -10,4 +10,5 @@ interface ICache
     public function del(string $key): int;
     public function encode(...$args): string;
     public function decode(string $key): array;
+    public function execute(string $command, string ...$args): mixed;
 }

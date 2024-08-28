@@ -31,6 +31,10 @@ class Redis implements ICache
             'timeout' => 2,
             'version' => $this->envLoader->get('REDIS_VERSION'),
         ]);
+
+        $pong = $this->redisClient->ping();
+        if ($pong !== 'PONG')
+            throw new \Exception('Redis server is not responding');
     }
 
     public function exists(string $key): bool
@@ -61,5 +65,10 @@ class Redis implements ICache
     public function decode(string $key): array
     {
         return json_decode($key, true);
+    }
+
+    public function execute(string $command, string ...$args): mixed
+    {
+        return $this->redisClient->executeRaw([$command, ...$args]);
     }
 }
