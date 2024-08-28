@@ -31,7 +31,6 @@ $CONTAINER->init([
         try {
             return new Redis($CONTAINER->get(EnvLoader::class));
         } catch (Exception $e) {
-            $CONTAINER->get(Logger::class)->log($e->getMessage()); //non blocking fault. No cache will be used.
             return null;
         }
     },

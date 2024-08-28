@@ -7,6 +7,7 @@ class Redis implements ICache
     private \RedisClient\RedisClient $redisClient;
     private string $redisServer;
     private string $redisVersion;
+    private ?int $redisInvalidateSeconds;
 
     public function __construct(private EnvLoader $envLoader)
     {
@@ -25,6 +26,9 @@ class Redis implements ICache
         $this->redisVersion = $this->envLoader->get('REDIS_VERSION');
         if ($this->redisVersion === null)
             throw new \Exception('The REDIS_VERSION environment variable is not set');
+
+        $temp = $this->envLoader->get('REDIS_INVALIDATE_SECONDS');
+        $this->redisInvalidateSeconds = $temp === null || $temp === '' || !ctype_digit($temp) ? null : (int)$temp;
 
         $this->redisClient = \RedisClient\ClientFactory::create([
             'server' => $this->envLoader->get('REDIS_SERVER'),
@@ -49,7 +53,7 @@ class Redis implements ICache
 
     public function set(string $key, string $value, ?int $seconds = null, ?int $milliseconds = null, ?bool $exist = null): ?bool
     {
-        return $this->redisClient->set($key, $value, $seconds, $milliseconds, $exist ? 'XX' : ($exist == false ? 'NX' : null));
+        return $this->redisClient->set($key, $value, $seconds === null ? $this->redisInvalidateSeconds : $seconds, $milliseconds, $exist ? 'XX' : ($exist == false ? 'NX' : null));
     }
 
     public function del(string $key): int

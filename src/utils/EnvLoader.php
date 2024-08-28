@@ -24,7 +24,7 @@ class EnvLoader
         }
     }
 
-    public function get(string $key)
+    public function get(string $key): ?string
     {
         //return null if the value is empty or not set or null
         return $_ENV[$key] ?? null;

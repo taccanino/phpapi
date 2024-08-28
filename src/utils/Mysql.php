@@ -39,13 +39,37 @@ class Mysql implements IDatabase
     }
 
     // Function that incorporates prepared statements
-    function query(string $query, array $params = []): array|int|string
+    function query(string $query, array $params = [], array $tables = []): array|int|string
     {
-        if ($this->cache && stripos($query, 'SELECT') === 0) {
-            // Check if the query is cached
+        if (!$this->conn)
+            throw new \Exception('No database connection');
+
+        // Check if the query is a SELECT query
+        $isSelect = stripos($query, 'SELECT') === 0;
+
+        if ($this->cache && $isSelect) {
+            /**
+             * The cache is made like this (to be improved in the future with the use of more advanced cache functionalities (json, list, set, etc.)):
+             * [
+             *   '['SELECT * FROM example, temp WHERE id = ?, [1]]' => [...],
+             *   '['SELECT * FROM example, temp WHERE id = ?, [2]]' => [...],
+             *   '['SELECT name FROM temp, example WHERE id = ? AND city = ?, [2, 'ROME']]' => [...],
+             *   'example' => [
+             *     '['SELECT * FROM example, temp WHERE id = ?, [1]]',
+             *     '['SELECT * FROM example, temp WHERE id = ?, [2]]',
+             *     '['SELECT name FROM temp, example WHERE id = ? AND city = ?, [2, 'ROME']]'
+             *   ],
+             *   'temp' => [
+             *     '['SELECT * FROM example, temp WHERE id = ?, [1]]',
+             *     '['SELECT * FROM example, temp WHERE id = ?, [2]]',
+             *     '['SELECT name FROM temp, example WHERE id = ? AND city = ?, [2, 'ROME']]'
+             *   ],
+             * ]
+             */
+
             $cacheKey = $this->cache->encode([$query, $params]);
             $cachedResult = $this->cache->get($cacheKey);
-            if ($cachedResult !== null)
+            if ($cachedResult)
                 return $this->cache->decode($cachedResult);
         }
 
@@ -79,15 +103,35 @@ class Mysql implements IDatabase
 
         $stmt->execute();
 
-        if (stripos($query, 'SELECT') === 0) {
+        if ($isSelect) {
             // For SELECT queries, return the result set
             $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-            if ($this->cache)
+            if ($this->cache) {
                 $this->cache->set($cacheKey, $this->cache->encode($result));
+                foreach ($tables as $table) {
+                    $tableCache = $this->cache->get($table);
+                    if ($tableCache === null)
+                        $tableCache = [];
+                    else
+                        $tableCache = $this->cache->decode($tableCache);
+                    $tableCache[] = $cacheKey;
+                    $this->cache->set($table, $this->cache->encode($tableCache));
+                }
+            }
             return $result;
         }
 
-        // For non-SELECT queries, return the number of affected rows
+        // For non-SELECT queries, invalidate the cache of the affected tables
+        if ($this->cache) {
+            foreach ($tables as $table) {
+                $tableCache = $this->cache->get($table);
+                if ($tableCache !== null) {
+                    $tableCache = $this->cache->decode($tableCache);
+                    foreach ($tableCache as $queryCacheKey)
+                        $this->cache->del($queryCacheKey);
+                }
+            }
+        }
         return $stmt->affected_rows;
     }
 
