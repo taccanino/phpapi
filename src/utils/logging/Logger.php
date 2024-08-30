@@ -1,6 +1,9 @@
 <?php
 
-namespace utils;
+namespace utils\logging;
+
+use utils\env\EnvLoader;
+use utils\errors\ErrorEnum;
 
 class Logger
 {

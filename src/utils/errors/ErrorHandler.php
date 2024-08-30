@@ -1,6 +1,9 @@
 <?php
 
-namespace utils;
+namespace utils\errors;
+
+use utils\env\EnvLoader;
+use utils\logging\Logger;
 
 class ErrorHandler
 {

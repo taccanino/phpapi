@@ -11,15 +11,19 @@ function absolutePath(string $path): string
 require_once absolutePath('autoload.php');
 
 use utils\Container;
-use utils\EnvLoader;
-use utils\Logger;
-use utils\ErrorHandler;
-use utils\ICache;
-use utils\Redis;
-use utils\IDatabase;
-use utils\Mysql;
-use utils\Router;
-use utils\Route;
+use utils\env\EnvLoader;
+use utils\logging\Logger;
+use utils\errors\ErrorHandler;
+use utils\cache\ICache;
+use utils\cache\Redis;
+use utils\database\IDatabase;
+use utils\database\Mysql;
+use utils\routing\Router;
+use utils\routing\Route;
+use utils\routing\RouteParam;
+use utils\routing\RouteParamPositionEnum;
+use utils\typing\TypeChecker;
+use utils\typing\TypeEnum;
 
 $CONTAINER = new Container();
 $CONTAINER->init([
@@ -38,37 +42,26 @@ $CONTAINER->init([
     Router::class => fn() => new Router(
         [
             new Route(
-                "GET",
-                "/api/{test}",
-                function (array $data) {
-                    echo json_encode($data);
+                "POST",
+                "/api/{id}/test",
+                function (array $params) {
+                    echo json_encode($params);
                 },
                 [
-                    'test' =>
-                    [
-                        'regex' => '\d+',
-                        'type' => 'int'
-                    ]
+                    fn(array $params) => ["middleware" => true, ...$params],
                 ],
-            ),
-            new Route(
-                "POST",
-                "/api",
-                function (array $data) {
-                    echo json_encode($data);
-                },
+                [
+                    "id" => 'int',
+                ],
+                [
+                    "example" => 'string',
+                ],
+                [],
                 [],
                 [
-                    'data' =>
-                    [
-                        'regex' => '\.+',
-                        'type' => 'json'
-                    ]
-                ],
-                [function (array $data) {
-                    return ['middlewarePassed' => true, ...$data];
-                }]
-            )
+                    "example" => ExampleDTO::class,
+                ]
+            ),
         ]
     ),
 ]);

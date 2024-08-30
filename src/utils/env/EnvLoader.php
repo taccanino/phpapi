@@ -1,6 +1,8 @@
 <?php
 
-namespace utils;
+namespace utils\env;
+
+use utils\errors\ErrorEnum;
 
 class EnvLoader
 {

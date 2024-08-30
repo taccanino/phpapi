@@ -1,6 +1,9 @@
 <?php
 
-namespace utils;
+namespace utils\cache;
+
+use utils\env\EnvLoader;
+use utils\errors\ErrorEnum;
 
 class Redis implements ICache
 {

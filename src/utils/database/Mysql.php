@@ -1,6 +1,10 @@
 <?php
 
-namespace utils;
+namespace utils\database;
+
+use utils\cache\ICache;
+use utils\env\EnvLoader;
+use utils\errors\ErrorEnum;
 
 class Mysql implements IDatabase
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace utils;
+namespace utils\errors;
 
 enum ErrorEnum: int
 {
