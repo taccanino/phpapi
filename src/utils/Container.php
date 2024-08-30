@@ -2,6 +2,8 @@
 
 namespace utils;
 
+use utils\errors\ErrorEnum;
+
 class Container
 {
     private array $instances = [];

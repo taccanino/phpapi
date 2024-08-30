@@ -23,6 +23,11 @@ class Router
         $method = $_SERVER['REQUEST_METHOD'];
         //get path without query string
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+        //remove trailing slash
+        if (substr($path, -1) === '/')
+            $path = substr($path, 0, -1);
+
         //get query string
         $queryParams = $_GET;
         //get headers

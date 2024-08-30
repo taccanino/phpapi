@@ -19,6 +19,10 @@ class Route
         private array $bodyParamsTemplate = []
     ) {
         $this->callback = $callback;
+
+        //remove trailing slash
+        if (substr($this->pathTemplate, -1) === '/')
+            $this->pathTemplate = substr($this->pathTemplate, 0, -1);
     }
 
     public function __invoke(string $method, string $path, array $queryParams, array $headerParams, array $cookieParams, array $bodyParams): mixed

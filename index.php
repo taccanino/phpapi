@@ -40,7 +40,7 @@ $CONTAINER->init([
         [
             new Route(
                 "POST",
-                "/api/{id}/test",
+                "/api/{id}",
                 function (array $params) {
                     echo json_encode($params);
                 },
