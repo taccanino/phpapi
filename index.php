@@ -20,10 +20,6 @@ use utils\database\IDatabase;
 use utils\database\Mysql;
 use utils\routing\Router;
 use utils\routing\Route;
-use utils\routing\RouteParam;
-use utils\routing\RouteParamPositionEnum;
-use utils\typing\TypeChecker;
-use utils\typing\TypeEnum;
 
 $CONTAINER = new Container();
 $CONTAINER->init([
