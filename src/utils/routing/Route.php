@@ -2,6 +2,8 @@
 
 namespace utils\routing;
 
+use utils\errors\ErrorEnum;
+
 class Route
 {
     private $callback;
@@ -22,10 +24,10 @@ class Route
     public function __invoke(string $method, string $path, array $queryParams, array $headerParams, array $cookieParams, array $bodyParams): mixed
     {
         if (!$this->matchMethod($method))
-            throw new \Exception('Wrong method');
+            throw new \Exception('Wrong method', ErrorEnum::ROUTE_WRONG_METHOD->value);
 
         if (!$this->matchPath($path))
-            throw new \Exception('Wrong path');
+            throw new \Exception('Wrong path', ErrorEnum::ROUTE_WRONG_PATH->value);
 
         $pathParams = $this->extractPathParams($path);
 
@@ -112,13 +114,13 @@ class Route
     {
         if ($paramType === 'int') {
             if (preg_match('/^\d+$/', $param) !== 1)
-                throw new \Exception('Wrong type');
+                throw new \Exception('Wrong type', ErrorEnum::ROUTE_WRONG_PARAM_TYPE->value);
             return (int) $param;
         }
 
         if ($paramType === 'float') {
             if (preg_match('/^\d+(\.\d+)?$/', $param) !== 1)
-                throw new \Exception('Wrong type');
+                throw new \Exception('Wrong type', ErrorEnum::ROUTE_WRONG_PARAM_TYPE->value);
             return (float) $param;
         }
 
@@ -131,7 +133,7 @@ class Route
                 return true;
             if ($param === 'false' || $param === '0')
                 return false;
-            throw new \Exception('Wrong type');
+            throw new \Exception('Wrong type', ErrorEnum::ROUTE_WRONG_PARAM_TYPE->value);
         }
 
         if ($paramType === 'array') {
@@ -143,7 +145,7 @@ class Route
             $reflection = new \ReflectionClass($paramType);
             $constructor = $reflection->getConstructor();
             if ($constructor === null)
-                throw new \Exception('Wrong type');
+                throw new \Exception('Wrong type', ErrorEnum::ROUTE_WRONG_PARAM_TYPE->value);
             $parameters = $constructor->getParameters();
             $builtParams = [];
 
@@ -153,9 +155,9 @@ class Route
                 //if the parameter has a default value it means it is optional
                 $classParamType = $parameter->getType();
                 if ($classParamType === null)
-                    throw new \Exception('Wrong type');
+                    throw new \Exception('Wrong type', ErrorEnum::ROUTE_WRONG_PARAM_TYPE->value);
                 if (!array_key_exists($parameter->getName(), $param) && !$parameter->isOptional())
-                    throw new \Exception('Wrong type');
+                    throw new \Exception('Wrong type', ErrorEnum::ROUTE_WRONG_PARAM_TYPE->value);
 
                 $parameterToPass = $param[$parameter->getName()];
                 if ($classParamType->getName() !== 'string')
@@ -166,10 +168,10 @@ class Route
 
             $object = $reflection->newInstanceArgs($builtParams);
             if ($object === null)
-                throw new \Exception('Wrong type');
+                throw new \Exception('Wrong type', ErrorEnum::ROUTE_WRONG_PARAM_TYPE->value);
             return $object;
         }
 
-        throw new \Exception('Wrong type');
+        throw new \Exception('Wrong type', ErrorEnum::ROUTE_WRONG_PARAM_TYPE->value);
     }
 }
