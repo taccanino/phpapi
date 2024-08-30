@@ -20,6 +20,7 @@ use utils\database\IDatabase;
 use utils\database\Mysql;
 use utils\routing\Router;
 use utils\routing\Route;
+use dto\ExampleDTO;
 
 $CONTAINER = new Container();
 $CONTAINER->init([
@@ -51,9 +52,14 @@ $CONTAINER->init([
                 ],
                 [
                     "example" => 'string',
+                    "ttt" => 'float',
                 ],
-                [],
-                [],
+                [
+                    "temp-header" => 'string',
+                ],
+                [
+                    "cookie_test" => 'string',
+                ],
                 [
                     "example" => ExampleDTO::class,
                 ]
