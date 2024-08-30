@@ -7,7 +7,7 @@ class EnvLoader
     public function __construct(string $path)
     {
         if (!file_exists($path)) {
-            throw new \Exception('The .env file does not exist');
+            throw new \Exception('The .env file does not exist', ErrorEnum::ENVLOADER_FILE_NOT_FOUND->value);
         }
 
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);

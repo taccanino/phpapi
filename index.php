@@ -37,21 +37,38 @@ $CONTAINER->init([
     IDatabase::class => fn() => new Mysql($CONTAINER->get(EnvLoader::class), $CONTAINER->get(ICache::class)),
     Router::class => fn() => new Router(
         [
-            new Route("GET", "/", function (array $params) {
-                global $CONTAINER;
-                echo json_encode(['container' => $CONTAINER, 'params' => $params]);
-            }),
             new Route(
                 "GET",
-                "/{id}",
-                function (array $params) {
-                    echo json_encode(['params' => $params]);
+                "/api?{test}",
+                function (array $data) {
+                    echo json_encode($data);
                 },
-                ['id' => ['regex' => '\d+', 'type' => 'int']],
-                [function (array $params) {
-                    return [...$params, "middlewarePassed" => true];
-                }]
+                [
+                    'test' =>
+                    [
+                        'regex' => '\d+',
+                        'type' => 'int'
+                    ]
+                ],
             ),
+            new Route(
+                "POST",
+                "/api",
+                function (array $data) {
+                    echo json_encode($data);
+                },
+                [],
+                [
+                    'data' =>
+                    [
+                        'regex' => '\.+',
+                        'type' => 'json'
+                    ]
+                ],
+                [function (array $data) {
+                    return ['middlewarePassed' => true, ...$data];
+                }]
+            )
         ]
     ),
 ]);

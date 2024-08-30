@@ -10,7 +10,7 @@ class Logger
     {
         $this->logFile = $envLoader->get('LOG_FILE');
         if ($this->logFile === null)
-            throw new \Exception('The LOG_FILE environment variable is not set');
+            throw new \Exception('The LOG_FILE environment variable is not set', ErrorEnum::LOGGER_LOG_FILE_NOT_SET->value);
 
         ini_set('error_log', $this->logFile);
     }

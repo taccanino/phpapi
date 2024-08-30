@@ -46,16 +46,20 @@ class ErrorHandler
 
         // Display a user-friendly message if in production
         if ($this->isDevelopment())
-            echo ErrorHandler::formatErrorOutput(sprintf(
-                "Uncaught %s - \"%s\" in %s on line %d - %s",
-                get_class($exception),
-                $exception->getMessage(),
-                $exception->getFile(),
-                $exception->getLine(),
-                $exception->getTraceAsString()
-            ));
+            echo ErrorHandler::formatErrorOutput(
+                sprintf(
+                    "Uncaught %s (code: %d) - \"%s\" in %s on line %d - %s",
+                    get_class($exception),
+                    $exception->getCode(),
+                    $exception->getMessage(),
+                    $exception->getFile(),
+                    $exception->getLine(),
+                    $exception->getTraceAsString()
+                ),
+                $exception->getCode()
+            );
         else
-            echo ErrorHandler::formatErrorOutput(ErrorHandler::GENERIC_ERROR);
+            echo ErrorHandler::formatErrorOutput(ErrorHandler::GENERIC_ERROR, $exception->getCode());
 
         // Terminate the script
         exit(1);
@@ -64,8 +68,9 @@ class ErrorHandler
     private function logException(\Throwable $exception)
     {
         $logMessage = sprintf(
-            "%s: %s in %s on line %d\nStack trace:\n%s\n\n",
+            "%s (code: %d) - code: %s in %s on line %d\nStack trace:\n%s\n\n",
             get_class($exception),
+            $exception->getCode(),
             $exception->getMessage(),
             $exception->getFile(),
             $exception->getLine(),
@@ -87,7 +92,7 @@ class ErrorHandler
 
         $this->logException(new \ErrorException(
             $error['message'],
-            0,
+            ErrorEnum::SHUTDOWN_EXCEPTION->value,
             $error['type'],
             $error['file'],
             $error['line']
@@ -97,14 +102,18 @@ class ErrorHandler
 
         // Display a user-friendly message if in production
         if ($this->isDevelopment())
-            echo ErrorHandler::formatErrorOutput(sprintf(
-                "Fatal error: %s in %s on line %d",
-                $error['message'],
-                $error['file'],
-                $error['line']
-            ));
+            echo ErrorHandler::formatErrorOutput(
+                sprintf(
+                    "Fatal error (code: %d) - %s in %s on line %d",
+                    ErrorEnum::SHUTDOWN_EXCEPTION->value,
+                    $error['message'],
+                    $error['file'],
+                    $error['line']
+                ),
+                ErrorEnum::SHUTDOWN_EXCEPTION->value
+            );
         else
-            echo ErrorHandler::formatErrorOutput(ErrorHandler::GENERIC_ERROR);
+            echo ErrorHandler::formatErrorOutput(ErrorHandler::GENERIC_ERROR, ErrorEnum::SHUTDOWN_EXCEPTION->value);
     }
 
     private function isDevelopment()
@@ -112,8 +121,8 @@ class ErrorHandler
         return $this->envLoader->get('APP_ENV') === 'development';
     }
 
-    private static function formatErrorOutput(string $error): string
+    private static function formatErrorOutput(string $error, int $code): string
     {
-        return json_encode(['error' => $error]);
+        return json_encode(['code' => $code, 'error' => $error]);
     }
 }

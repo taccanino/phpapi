@@ -26,10 +26,10 @@ class Router
         $url = rtrim($url, '/');
 
         foreach ($this->routes as $route) {
-            $params = $route->match($method, $url);
-            if ($params === false)
+            $res = $route($method, $url);
+            if ($res === false)
                 continue;
-            return $route($params);
+            return $res;
         }
 
         http_response_code(404);

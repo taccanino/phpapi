@@ -21,11 +21,11 @@ class Redis implements ICache
 
         $this->redisServer = $this->envLoader->get('REDIS_SERVER');
         if ($this->redisServer === null)
-            throw new \Exception('The REDIS_SERVER environment variable is not set');
+            throw new \Exception('The REDIS_SERVER environment variable is not set', ErrorEnum::CACHE_SERVER_NOT_SET->value);
 
         $this->redisVersion = $this->envLoader->get('REDIS_VERSION');
         if ($this->redisVersion === null)
-            throw new \Exception('The REDIS_VERSION environment variable is not set');
+            throw new \Exception('The REDIS_VERSION environment variable is not set', ErrorEnum::CACHE_VERSION_NOT_SET->value);
 
         $temp = $this->envLoader->get('REDIS_INVALIDATE_SECONDS');
         $this->redisInvalidateSeconds = $temp === null || $temp === '' || !ctype_digit($temp) ? null : (int)$temp;
@@ -38,7 +38,7 @@ class Redis implements ICache
 
         $pong = $this->redisClient->ping();
         if ($pong !== 'PONG')
-            throw new \Exception('Redis server is not responding');
+            throw new \Exception('Redis server is not responding', ErrorEnum::CACHE_CONNECTION_ERROR->value);
     }
 
     public function exists(string $key): bool

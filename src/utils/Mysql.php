@@ -20,19 +20,19 @@ class Mysql implements IDatabase
     {
         $this->host = $this->envLoader->get('DB_HOST');
         if ($this->host === null)
-            throw new \Exception('The DB_HOST environment variable is not set');
+            throw new \Exception('The DB_HOST environment variable is not set', ErrorEnum::DATABASE_HOST_NOT_SET->value);
 
         $this->user = $this->envLoader->get('DB_USER');
         if ($this->user === null)
-            throw new \Exception('The DB_USER environment variable is not set');
+            throw new \Exception('The DB_USER environment variable is not set', ErrorEnum::DATABASE_USER_NOT_SET->value);
 
         $this->pass = $this->envLoader->get('DB_PASS');
         if ($this->pass === null)
-            throw new \Exception('The DB_PASS environment variable is not set');
+            throw new \Exception('The DB_PASS environment variable is not set', ErrorEnum::DATABASE_PASS_NOT_SET->value);
 
         $this->name = $this->envLoader->get('DB_NAME');
         if ($this->name === null)
-            throw new \Exception('The DB_NAME environment variable is not set');
+            throw new \Exception('The DB_NAME environment variable is not set', ErrorEnum::DATABASE_NAME_NOT_SET->value);
 
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $this->conn = new \mysqli($this->host, $this->user, $this->pass, $this->name);
@@ -42,7 +42,7 @@ class Mysql implements IDatabase
     function query(string $query, array $params = [], array $tables = []): array|int|string
     {
         if (!$this->conn)
-            throw new \Exception('No database connection');
+            throw new \Exception('No database connection', ErrorEnum::DATABASE_CONNECTION_ERROR->value);
 
         // Check if the query is a SELECT query
         $isSelect = stripos($query, 'SELECT') === 0;

@@ -30,7 +30,7 @@ class Container
             return;
 
         if ($this->definitions === null)
-            throw new \Exception("Cannot load class {$className} without definitions");
+            throw new \Exception("Cannot load class {$className} without definitions", ErrorEnum::CONTAINER_MISSING_DEFINITIONS->value);
 
         // If the class has a definition, use it to create an instance
         if (isset($this->definitions[$className])) {
@@ -51,7 +51,7 @@ class Container
         foreach ($parameters as $parameter) {
             $dependency = $parameter->getType();
             if ($dependency === null)
-                throw new \Exception("Cannot resolve dependency for parameter \${$parameter->getName()} in {$className} constructor");
+                throw new \Exception("Cannot resolve dependency for parameter \${$parameter->getName()} in {$className} constructor", ErrorEnum::CONTAINER_CANNOT_RESOLVE_CONSTRUCTOR_PARAMETER_DEPENDENCY->value);
             $dependencies[] = $this->get($dependency->getName());
         }
 
@@ -66,7 +66,7 @@ class Container
     public function loadAll(): void
     {
         if ($this->definitions === null)
-            throw new \Exception("Cannot load classes without definitions");
+            throw new \Exception("Cannot load classes without definitions", ErrorEnum::CONTAINER_MISSING_DEFINITIONS->value);
 
         foreach (array_keys($this->definitions) as $className)
             $this->load($className);
