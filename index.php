@@ -30,7 +30,7 @@ $CONTAINER->init([
         global $CONTAINER;
         try {
             return new Redis($CONTAINER->get(EnvLoader::class));
-        } catch (Exception $e) {
+        } catch (Exception) {
             return null;
         }
     },
@@ -39,7 +39,7 @@ $CONTAINER->init([
         [
             new Route(
                 "GET",
-                "/api?{test}",
+                "/api/{test}",
                 function (array $data) {
                     echo json_encode($data);
                 },
