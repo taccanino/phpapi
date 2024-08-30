@@ -46,7 +46,7 @@ class Router
     private function getRequestBody(): array
     {
         //if application/json get the body from the input stream, else get it from $_POST
-        if (strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false)
+        if (array_key_exists('CONTENT_TYPE', $_SERVER) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false)
             return json_decode(file_get_contents('php://input'), true);
 
         return $_POST;
