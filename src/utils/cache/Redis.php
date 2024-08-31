@@ -34,9 +34,9 @@ class Redis implements ICache
         $this->redisInvalidateSeconds = $temp === null || $temp === '' || !ctype_digit($temp) ? null : (int)$temp;
 
         $this->redisClient = \RedisClient\ClientFactory::create([
-            'server' => $this->envLoader->get('REDIS_SERVER'),
+            'server' => $this->redisServer,
             'timeout' => 2,
-            'version' => $this->envLoader->get('REDIS_VERSION'),
+            'version' => $this->redisVersion,
         ]);
 
         $pong = $this->redisClient->ping();
