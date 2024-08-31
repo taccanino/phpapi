@@ -102,11 +102,10 @@ class Route
 
         foreach ($paramsTemplate as $paramName => $paramType) {
             if (!array_key_exists($paramName, $params))
-                return false;
+                throw new \Exception('Missing parameter', ErrorEnum::ROUTE_MISSING_PARAM->value);
 
-            if (is_array($params[$paramName])) {
+            if (is_array($params[$paramName]))
                 $params[$paramName] = json_encode($params[$paramName]);
-            }
 
             $builtParams[$paramName] = $this->buildParam($params[$paramName], $paramType);
         }

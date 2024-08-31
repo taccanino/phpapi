@@ -20,4 +20,5 @@ enum ErrorEnum: int
     case ROUTE_WRONG_METHOD = 13;
     case ROUTE_WRONG_PATH = 14;
     case ROUTE_WRONG_PARAM_TYPE = 15;
+    case ROUTE_MISSING_PARAM = 16;
 }

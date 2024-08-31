@@ -2,6 +2,8 @@
 
 namespace utils\routing;
 
+use utils\errors\ErrorEnum;
+
 class Router
 {
     public function __construct(private array $routes = []) {}
@@ -40,8 +42,20 @@ class Router
         foreach ($this->routes as $route)
             try {
                 return $route($method, $path, $queryParams, $headerParams, $cookieParams, $bodyParams);
-            } catch (\Exception) {
-                continue;
+            } catch (\Exception $e) {
+                if ($e->getCode() === ErrorEnum::ROUTE_MISSING_PARAM->value) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Missing parameter']);
+                    return;
+                } else if ($e->getCode() === ErrorEnum::ROUTE_WRONG_PARAM_TYPE->value) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Wrong parameter type or value']);
+                    return;
+                } else if ($e->getCode() === ErrorEnum::ROUTE_WRONG_METHOD->value)
+                    continue;
+                else if ($e->getCode() === ErrorEnum::ROUTE_WRONG_PATH->value)
+                    continue;
+                throw $e;
             }
 
         http_response_code(404);

@@ -40,26 +40,19 @@ $CONTAINER->init([
         [
             new Route(
                 "POST",
-                "/api/{id}",
+                "/api",
                 function (array $params) {
                     echo json_encode($params);
                 },
                 [
                     fn(array $params) => ["middleware" => true, ...$params],
                 ],
-                [
-                    "id" => 'int',
-                ],
-                [
-                    "example" => 'string',
-                    "ttt" => 'float',
-                ],
+                [],
+                [],
                 [
                     "temp-header" => 'string',
                 ],
-                [
-                    "cookie_test" => 'string',
-                ],
+                [],
                 [
                     "example" => ExampleDTO::class,
                 ]
