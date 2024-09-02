@@ -86,15 +86,11 @@ class Mysql implements IDatabase
             $boundParams = [];
 
             foreach ($params as $param) {
-                if (is_int($param))
-                    $types .= 'i';
-                elseif (is_float($param))
-                    $types .= 'd';
-                elseif (is_string($param))
-                    $types .= 's';
-                elseif (is_bool($param))
+                if (is_int($param) || is_bool($param))
                     $types .= 'i'; // boolean treated as integer (1 or 0)
-                elseif (is_null($param))
+                else if (is_float($param))
+                    $types .= 'd';
+                else if (is_string($param) || is_null($param))
                     $types .= 's'; // NULL treated as string (though it's null in DB)
                 else
                     $types .= 'b'; // Other types like arrays, objects, or resources as blobs
@@ -114,10 +110,7 @@ class Mysql implements IDatabase
                 $this->cache->set($cacheKey, $this->cache->encode($result));
                 foreach ($tables as $table) {
                     $tableCache = $this->cache->get($table);
-                    if ($tableCache === null)
-                        $tableCache = [];
-                    else
-                        $tableCache = $this->cache->decode($tableCache);
+                    $tableCache = $tableCache === null ? [] : $this->cache->decode($tableCache);
                     $tableCache[] = $cacheKey;
                     $this->cache->set($table, $this->cache->encode($tableCache));
                 }
@@ -136,6 +129,7 @@ class Mysql implements IDatabase
                 }
             }
         }
+
         return $stmt->affected_rows;
     }
 

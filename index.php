@@ -38,13 +38,16 @@ $CONTAINER->init([
     Router::class => fn() => new Router(
         [
             new Route(
-                "POST",
-                "/api",
-                function () {
+                "GET",
+                "/api/watercrafts/{id}",
+                function (array $params) {
                     global $CONTAINER;
-                    $watercrafts = $CONTAINER->get(IDatabase::class)->query("SELECT * FROM watercrafts");
-                    echo json_encode($watercrafts);
+                    echo json_encode($CONTAINER->get(IDatabase::class)->query("SELECT * FROM watercrafts WHERE id = ?", $params["path"]));
                 },
+                [],
+                [
+                    "id" => "int"
+                ]
             ),
         ]
     ),

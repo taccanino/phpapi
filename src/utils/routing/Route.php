@@ -78,11 +78,9 @@ class Route
         $pathParts = explode('/', $path);
         $pathTemplateParts = explode('/', $this->pathTemplate);
 
-        for ($i = 0; $i < count($pathParts); $i++) {
-            if (strpos($pathTemplateParts[$i], '{') === 0) {
+        for ($i = 0; $i < count($pathParts); $i++)
+            if (strpos($pathTemplateParts[$i], '{') === 0)
                 $pathParams[substr($pathTemplateParts[$i], 1, -1)] = $pathParts[$i];
-            }
-        }
 
         return $pathParams;
     }
