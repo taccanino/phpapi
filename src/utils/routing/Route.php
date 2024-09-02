@@ -14,9 +14,9 @@ class Route
         private array $middlewares = [],
         private array $pathParamsTemplate = [],
         private array $queryParamsTemplate = [],
+        private array $bodyParamsTemplate = [],
         private array $headerParamsTemplate = [],
         private array $cookieParamsTemplate = [],
-        private array $bodyParamsTemplate = []
     ) {
         $this->callback = $callback;
 

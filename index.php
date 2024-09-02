@@ -20,7 +20,6 @@ use utils\database\IDatabase;
 use utils\database\Mysql;
 use utils\routing\Router;
 use utils\routing\Route;
-use dto\ExampleDTO;
 
 $CONTAINER = new Container();
 $CONTAINER->init([
@@ -41,21 +40,11 @@ $CONTAINER->init([
             new Route(
                 "POST",
                 "/api",
-                function (array $params) {
-                    echo json_encode($params);
+                function () {
+                    global $CONTAINER;
+                    $watercrafts = $CONTAINER->get(IDatabase::class)->query("SELECT * FROM watercrafts");
+                    echo json_encode($watercrafts);
                 },
-                [
-                    fn(array $params) => ["middleware" => true, ...$params],
-                ],
-                [],
-                [],
-                [
-                    "temp-header" => 'string',
-                ],
-                [],
-                [
-                    "example" => ExampleDTO::class,
-                ]
             ),
         ]
     ),
